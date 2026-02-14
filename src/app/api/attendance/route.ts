@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { haversineDistance } from '@/lib/geo'
 import { LocalStorageAdapter } from '@/lib/storage'
-import { writeFile } from 'fs/promises'
 
 // POST /api/attendance
 export async function POST(req: NextRequest) {
@@ -44,8 +43,7 @@ export async function POST(req: NextRequest) {
   }
   // Save selfie file using local storage
   const storage = new LocalStorageAdapter()
-  const filename = `${session.user.id}_${Date.now()}.${ext}`
-  const filePath = await storage.saveFile(buffer, 'selfies', filename)
+  const { filePath } = await storage.saveFile(buffer, ext)
   // Create attendance record
   const staff = await prisma.staffProfile.findFirst({ where: { userId: session.user.id } })
   if (!staff) {
