@@ -1,0 +1,287 @@
+// Prisma schema for YKVM Staff MIS
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enumerations
+enum UserRole {
+  ADMIN
+  SUB_ADMIN
+  APPROVER1
+  APPROVER2
+  STAFF
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  INVALID
+}
+
+enum LeaveType {
+  PAID
+  UNPAID
+}
+
+enum ApprovalDecision {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum FieldTripStatus {
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum PayrollStatus {
+  PENDING
+  GENERATED
+  PAID
+}
+
+/// User model used for authentication. One-to-one with StaffProfile.
+model User {
+  id        String    @id @default(uuid())
+  name      String?
+  email     String?   @unique
+  phone     String?   @unique
+  password  String
+  role      UserRole  @default(STAFF)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  staff     StaffProfile?
+  auditLogs AuditLog[]
+}
+
+/// Staff profile containing HR information.
+model StaffProfile {
+  id           String           @id @default(uuid())
+  userId       String           @unique
+  user         User             @relation(fields: [userId], references: [id])
+  photo        String?
+  designation  String?
+  department   String?
+  joiningDate  DateTime?
+  salary       Decimal?         @db.Decimal(10,2)
+  bankName     String?
+  accountNumber String?
+  ifscCode     String?
+  status       String?          // e.g. Active, Inactive
+  documents    StaffDocument[]
+  attendances  Attendance[]
+  leaves       Leave[]
+  fieldTrips   FieldTrip[]
+  payrolls     Payroll[]
+  taRegisters  TARegister[]
+}
+
+/// Uploaded documents for staff profiles.
+model StaffDocument {
+  id           String  @id @default(uuid())
+  staffProfileId String
+  staffProfile StaffProfile @relation(fields: [staffProfileId], references: [id])
+  type         String
+  file         String
+  verified     Boolean @default(false)
+}
+
+/// Office locations for geofence attendance.
+model OfficeLocation {
+  id           String   @id @default(uuid())
+  name         String
+  lat          Decimal  @db.Decimal(10,7)
+  lng          Decimal  @db.Decimal(10,7)
+  radiusMeters Int      @default(10)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+/// Attendance records captured via selfie and GPS.
+model Attendance {
+  id             String     @id @default(uuid())
+  staffId        String
+  staff          StaffProfile @relation(fields: [staffId], references: [id])
+  datetime       DateTime
+  selfieFile     String
+  lat            Decimal     @db.Decimal(10,7)
+  lng            Decimal     @db.Decimal(10,7)
+  accuracy       Float?
+  distanceToOffice Float?
+  status         AttendanceStatus
+  deviceInfo     String?
+  createdAt      DateTime    @default(now())
+}
+
+/// Leave applications submitted by staff.
+model Leave {
+  id         String      @id @default(uuid())
+  staffId    String
+  staff      StaffProfile @relation(fields: [staffId], references: [id])
+  type       LeaveType
+  fromDate   DateTime
+  toDate     DateTime
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+  approvals  LeaveApproval[]
+  createdAt  DateTime    @default(now())
+}
+
+/// Individual approval records for leave requests. Supports multi‑step approval.
+model LeaveApproval {
+  id         String      @id @default(uuid())
+  leaveId    String
+  leave      Leave       @relation(fields: [leaveId], references: [id])
+  level      Int         // 1 for Approver-1, 2 for Approver-2
+  approverId String
+  approver   User        @relation(fields: [approverId], references: [id])
+  decision   ApprovalDecision @default(PENDING)
+  comment    String?
+  decidedAt  DateTime?
+}
+
+/// Field trips capture movement outside office.
+model FieldTrip {
+  id             String        @id @default(uuid())
+  staffId        String
+  staff          StaffProfile  @relation(fields: [staffId], references: [id])
+  startTime      DateTime
+  endTime        DateTime?
+  startLat       Decimal       @db.Decimal(10,7)
+  startLng       Decimal       @db.Decimal(10,7)
+  endLat         Decimal?      @db.Decimal(10,7)
+  endLng         Decimal?      @db.Decimal(10,7)
+  status         FieldTripStatus @default(ONGOING)
+  startOdometer  Float?
+  endOdometer    Float?
+  computedKm     Float?
+  taAmount       Decimal?       @db.Decimal(10,2)
+  pings          LocationPing[]
+  activities     Activity[]
+  taRegister     TARegister?
+}
+
+/// Pings recorded during a field trip.
+model LocationPing {
+  id          String    @id @default(uuid())
+  fieldTripId String
+  fieldTrip   FieldTrip @relation(fields: [fieldTripId], references: [id])
+  time        DateTime
+  lat         Decimal   @db.Decimal(10,7)
+  lng         Decimal   @db.Decimal(10,7)
+  accuracy    Float?
+}
+
+/// Activities performed by staff during field trips.
+model Activity {
+  id            String        @id @default(uuid())
+  fieldTripId   String
+  fieldTrip     FieldTrip     @relation(fields: [fieldTripId], references: [id])
+  title         String
+  description   String?
+  villageName   String?
+  time          DateTime
+  gpsRequired   Boolean       @default(false)
+  photos        ActivityPhoto[]
+  attendanceSheet AttendanceSheetUpload?
+  proceeding    Proceeding?
+}
+
+/// Photos uploaded for an activity.
+model ActivityPhoto {
+  id          String  @id @default(uuid())
+  activityId  String
+  activity    Activity @relation(fields: [activityId], references: [id])
+  file        String
+  lat         Decimal? @db.Decimal(10,7)
+  lng         Decimal? @db.Decimal(10,7)
+  timestamp   DateTime @default(now())
+}
+
+/// Uploaded attendance sheet images for an activity.
+model AttendanceSheetUpload {
+  id          String  @id @default(uuid())
+  activityId  String  @unique
+  activity    Activity @relation(fields: [activityId], references: [id])
+  file        String
+}
+
+/// Proceeding documents generated for activities or field trips.
+model Proceeding {
+  id              String   @id @default(uuid())
+  activityId      String?  @unique
+  activity        Activity? @relation(fields: [activityId], references: [id])
+  fieldTripId     String?  @unique
+  fieldTrip       FieldTrip? @relation(fields: [fieldTripId], references: [id])
+  generatedPdfFile String
+  jsonData        Json
+  createdAt       DateTime @default(now())
+}
+
+/// Payroll records generated monthly.
+model Payroll {
+  id             String     @id @default(uuid())
+  staffId        String
+  staff          StaffProfile @relation(fields: [staffId], references: [id])
+  month          Int        // 1-12
+  year           Int
+  gross          Decimal    @db.Decimal(10,2)
+  deductions     Decimal    @db.Decimal(10,2)
+  net            Decimal    @db.Decimal(10,2)
+  presentDays    Int
+  paidLeaveDays  Int
+  unpaidLeaveDays Int
+  status         PayrollStatus @default(PENDING)
+  salaryPayments SalaryPayment?
+  createdAt      DateTime   @default(now())
+}
+
+/// Salary payment transactions.
+model SalaryPayment {
+  id        String   @id @default(uuid())
+  payrollId String   @unique
+  payroll   Payroll  @relation(fields: [payrollId], references: [id])
+  paidOn    DateTime @default(now())
+  method    String
+  referenceNo String
+}
+
+/// TA register summarises distance traveled each month for a staff.
+model TARegister {
+  id         String   @id @default(uuid())
+  staffId    String
+  staff      StaffProfile @relation(fields: [staffId], references: [id])
+  month      Int
+  year       Int
+  totalKm    Float
+  totalTA    Decimal   @db.Decimal(10,2)
+  generatedPdf String
+  createdAt  DateTime  @default(now())
+  fieldTrips FieldTrip[]
+}
+
+/// Audit log for capturing actions across the system.
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  actionType String
+  entityType String
+  entityId   String
+  timestamp  DateTime @default(now())
+  metaJson   Json?
+}
