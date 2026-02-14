@@ -50,31 +50,51 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        const email = user.email;
-        if (!email) return false;
+        try {
+          const email = user.email;
+          if (!email) return false;
 
-        const existingUser = await prisma.user.findUnique({
-          where: { email },
-        });
+          let existingUser = await prisma.user.findUnique({
+            where: { email },
+          });
 
-        if (existingUser) {
+          if (!existingUser) {
+            const MAIN_ADMIN_EMAIL = "manojk38904@gmail.com";
+            if (email.toLowerCase() === MAIN_ADMIN_EMAIL) {
+              existingUser = await prisma.user.create({
+                data: {
+                  email,
+                  name: user.name || "Admin",
+                  role: "ADMIN",
+                  password: "",
+                  googleId: account.providerAccountId,
+                  image: user.image,
+                },
+              });
+              return true;
+            }
+            return false;
+          }
+
           if (existingUser.role !== "ADMIN" && existingUser.role !== "SUB_ADMIN") {
             return false;
           }
-          if (!existingUser.googleId) {
+
+          if (!existingUser.googleId || existingUser.googleId !== account.providerAccountId) {
             await prisma.user.update({
               where: { id: existingUser.id },
               data: {
                 googleId: account.providerAccountId,
-                image: user.image,
+                image: user.image || existingUser.image,
                 name: existingUser.name || user.name,
               },
             });
           }
           return true;
+        } catch (error) {
+          console.error("Google signIn error:", error);
+          return false;
         }
-
-        return false;
       }
       return true;
     },

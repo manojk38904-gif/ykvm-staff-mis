@@ -1,7 +1,8 @@
 "use client";
 
 import { signIn, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 const socialLinks = {
   youtube: "https://www.youtube.com/channel/UC_R1U7XAKORvQ8Ya4qWFvyw",
@@ -34,6 +35,18 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError === "AccessDenied") {
+      setError("Access denied. Your Google account is not authorized as Admin or Sub-Admin. Please contact the main administrator.");
+    } else if (urlError === "OAuthAccountNotLinked") {
+      setError("This email is already linked to a different sign-in method.");
+    } else if (urlError) {
+      setError("Sign-in failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,5 +195,13 @@ export default function Home() {
     return <DashboardRedirect />;
   }
 
-  return <LoginForm />;
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
+  );
 }
