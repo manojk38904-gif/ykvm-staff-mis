@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  if (session.user.role !== 'STAFF') {
+  if ((session.user as any).role !== 'STAFF') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const body = await req.json()
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   const storage = new LocalStorageAdapter()
   const { filePath } = await storage.saveFile(buffer, ext)
   // Create attendance record
-  const staff = await prisma.staffProfile.findFirst({ where: { userId: session.user.id } })
+  const staff = await prisma.staffProfile.findFirst({ where: { userId: (session.user as any).id } })
   if (!staff) {
     return NextResponse.json({ error: 'Staff profile not found' }, { status: 404 })
   }
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   // Audit log
   await prisma.auditLog.create({
     data: {
-      userId: session.user.id,
+      userId: (session.user as any).id,
       actionType: 'ATTENDANCE_SUBMIT',
       entityType: 'Attendance',
       entityId: staff.id,

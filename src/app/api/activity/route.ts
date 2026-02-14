@@ -38,9 +38,8 @@ export async function POST(req: NextRequest) {
     if (!match) continue
     const ext = match[1] === 'jpeg' ? 'jpg' : match[1]
     const buffer = Buffer.from(match[2], 'base64')
-    const filename = `${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`
-    const path = await storage.saveFile(buffer, 'activity_photos', filename)
-    photoRecords.push({ file: path, lat: photo.lat ?? null, lng: photo.lng ?? null })
+    const result = await storage.saveFile(buffer, ext)
+    photoRecords.push({ file: result.filePath, lat: photo.lat ?? null, lng: photo.lng ?? null })
   }
   // Save attendance sheet if provided
   let attendanceSheetPath: string | undefined
@@ -49,8 +48,8 @@ export async function POST(req: NextRequest) {
     if (match2) {
       const ext = match2[1] === 'jpeg' ? 'jpg' : match2[1]
       const buffer = Buffer.from(match2[2], 'base64')
-      const filename = `${Date.now()}_sheet.${ext}`
-      attendanceSheetPath = await storage.saveFile(buffer, 'attendance_sheets', filename)
+      const sheetResult = await storage.saveFile(buffer, ext)
+      attendanceSheetPath = sheetResult.filePath
     }
   }
   const activity = await prisma.activity.create({
@@ -75,7 +74,7 @@ export async function POST(req: NextRequest) {
   // Audit log
   await prisma.auditLog.create({
     data: {
-      userId: session.user.id,
+      userId: (session.user as any).id,
       actionType: 'ACTIVITY_CREATE',
       entityType: 'Activity',
       entityId: activity.id,
