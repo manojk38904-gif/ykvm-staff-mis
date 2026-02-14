@@ -4,16 +4,16 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-  // You can customise headers to strengthen PWA security later.
-  headers: async () => {
+
+  async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Content-Security-Policy',
+            key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; style-src 'self' 'unsafe-inline'";
+              "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; style-src 'self' 'unsafe-inline';",
           },
         ],
       },
