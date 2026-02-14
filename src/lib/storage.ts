@@ -41,6 +41,10 @@ export class LocalStorageAdapter {
     };
   }
 
+  async saveFile(buffer: Buffer, ext?: string) {
+    return this.saveBuffer(buffer, ext);
+  }
+
   async saveBase64Image(base64: string, ext?: string) {
     let data = base64;
     let detectedExt = ext;
