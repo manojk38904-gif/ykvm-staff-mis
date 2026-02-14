@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
     if (!match) continue
     const ext = match[1] === 'jpeg' ? 'jpg' : match[1]
     const buffer = Buffer.from(match[2], 'base64')
-    const result = await storage.saveFile(buffer, ext)
+    const filename = `${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`
+    const result = await storage.saveFile(buffer, 'activity_photos', filename)
     photoRecords.push({ file: result.filePath, lat: photo.lat ?? null, lng: photo.lng ?? null })
   }
   // Save attendance sheet if provided
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
     if (match2) {
       const ext = match2[1] === 'jpeg' ? 'jpg' : match2[1]
       const buffer = Buffer.from(match2[2], 'base64')
-      const sheetResult = await storage.saveFile(buffer, ext)
+      const filename = `${Date.now()}_sheet.${ext}`
+      const sheetResult = await storage.saveFile(buffer, 'attendance_sheets', filename)
       attendanceSheetPath = sheetResult.filePath
     }
   }

@@ -41,8 +41,20 @@ export class LocalStorageAdapter {
     };
   }
 
-  async saveFile(buffer: Buffer, ext?: string) {
-    return this.saveBuffer(buffer, ext);
+  async saveFile(buffer: Buffer, folderOrExt?: string, filename?: string) {
+    if (filename && folderOrExt) {
+      const folder = folderOrExt;
+      const dir = path.join(this.uploadDir, folder);
+      await fs.mkdir(dir, { recursive: true });
+      const filePath = path.join(dir, filename);
+      await fs.writeFile(filePath, buffer);
+      return {
+        fileName: filename,
+        filePath,
+        urlPath: `/uploads/${folder}/${filename}`,
+      };
+    }
+    return this.saveBuffer(buffer, folderOrExt);
   }
 
   async saveBase64Image(base64: string, ext?: string) {
