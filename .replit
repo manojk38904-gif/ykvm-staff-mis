@@ -1,0 +1,15 @@
+modules = ["nodejs-20"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_SECRET = "ykvm-staff-mis-replit-secret-key-2026"
+NEXTAUTH_URL = "http://0.0.0.0:5000"
+TA_RATE_PER_KM = "3"
+GEOFENCE_RADIUS_METERS = "10"
+PING_INTERVAL_MINUTES = "5"

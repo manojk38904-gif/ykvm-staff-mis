@@ -12,28 +12,28 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "next-auth": "latest",
-    "@prisma/client": "latest",
-    "prisma": "latest",
-    "bcryptjs": "latest",
-    "qrcode": "latest",
-    "pdfkit": "latest",
+    "@prisma/client": "^5.22.0",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "typescript": "latest",
-    "tailwindcss": "latest",
     "autoprefixer": "latest",
-    "postcss": "latest",
+    "bcryptjs": "latest",
     "clsx": "latest",
+    "next": "latest",
+    "next-auth": "latest",
+    "pdfkit": "latest",
+    "postcss": "latest",
+    "prisma": "^5.22.0",
+    "qrcode": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
     "zod": "latest"
   },
   "devDependencies": {
     "@types/bcryptjs": "latest",
-    "@types/qrcode": "latest",
-    "@types/pdfkit": "latest"
+    "@types/pdfkit": "latest",
+    "@types/qrcode": "latest"
   }
 }

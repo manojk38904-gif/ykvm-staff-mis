@@ -64,8 +64,9 @@ model User {
   role      UserRole  @default(STAFF)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  staff     StaffProfile?
-  auditLogs AuditLog[]
+  staff          StaffProfile?
+  auditLogs      AuditLog[]
+  leaveApprovals LeaveApproval[]
 }
 
 /// Staff profile containing HR information.
@@ -172,7 +173,9 @@ model FieldTrip {
   taAmount       Decimal?       @db.Decimal(10,2)
   pings          LocationPing[]
   activities     Activity[]
-  taRegister     TARegister?
+  proceeding     Proceeding?
+  taRegisterId   String?
+  taRegister     TARegister?  @relation(fields: [taRegisterId], references: [id])
 }
 
 /// Pings recorded during a field trip.
@@ -225,8 +228,8 @@ model Proceeding {
   id              String   @id @default(uuid())
   activityId      String?  @unique
   activity        Activity? @relation(fields: [activityId], references: [id])
-  fieldTripId     String?  @unique
-  fieldTrip       FieldTrip? @relation(fields: [fieldTripId], references: [id])
+  fieldTripId     String?     @unique
+  fieldTrip       FieldTrip?  @relation(fields: [fieldTripId], references: [id])
   generatedPdfFile String
   jsonData        Json
   createdAt       DateTime @default(now())
