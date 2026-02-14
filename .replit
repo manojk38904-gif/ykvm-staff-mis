@@ -1,4 +1,4 @@
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "postgresql-16"]
 [agent]
 expertMode = true
 
@@ -9,7 +9,6 @@ channel = "stable-25_05"
 
 [userenv.shared]
 NEXTAUTH_SECRET = "ykvm-staff-mis-replit-secret-key-2026"
-NEXTAUTH_URL = "http://0.0.0.0:5000"
 TA_RATE_PER_KM = "3"
 GEOFENCE_RADIUS_METERS = "10"
 PING_INTERVAL_MINUTES = "5"
