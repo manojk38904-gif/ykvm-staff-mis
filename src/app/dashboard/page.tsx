@@ -67,36 +67,54 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <DashboardCard
-              title="Attendance"
-              description="Mark daily attendance with selfie and GPS verification"
-              icon="📋"
-            />
-            <DashboardCard
-              title="Field Trips"
-              description="Start and manage field trips with location tracking"
-              icon="🗺️"
-            />
-            <DashboardCard
-              title="Leave Management"
-              description="Apply for leave and view leave balance"
-              icon="📅"
-            />
-            <DashboardCard
-              title="Activities"
-              description="Record field activities with photos and reports"
-              icon="📸"
-            />
-            <DashboardCard
-              title="Payroll"
-              description="View salary slips and payment history"
-              icon="💰"
-            />
-            <DashboardCard
-              title="Profile"
-              description="View and update your staff profile"
-              icon="👤"
-            />
+            <Link href="/dashboard/attendance">
+              <DashboardCard
+                title="Attendance"
+                description="Mark daily attendance with selfie and GPS verification"
+                icon="📋"
+                href="/dashboard/attendance"
+              />
+            </Link>
+            <Link href="/dashboard/field-trips">
+              <DashboardCard
+                title="Field Trips"
+                description="Start and manage field trips with location tracking"
+                icon="🗺️"
+                href="/dashboard/field-trips"
+              />
+            </Link>
+            <Link href="/dashboard/leaves">
+              <DashboardCard
+                title="Leave Management"
+                description="Apply for leave and view leave balance"
+                icon="📅"
+                href="/dashboard/leaves"
+              />
+            </Link>
+            <Link href="/dashboard/activities">
+              <DashboardCard
+                title="Activities"
+                description="Record field activities with photos and reports"
+                icon="📸"
+                href="/dashboard/activities"
+              />
+            </Link>
+            <Link href="/dashboard/payroll">
+              <DashboardCard
+                title="Payroll"
+                description="View salary slips and payment history"
+                icon="💰"
+                href="/dashboard/payroll"
+              />
+            </Link>
+            <Link href="/dashboard/profile">
+              <DashboardCard
+                title="Profile"
+                description="View and update your staff profile"
+                icon="👤"
+                href="/dashboard/profile"
+              />
+            </Link>
           </div>
 
           {user?.role === "ADMIN" && (
@@ -108,23 +126,33 @@ export default function DashboardPage() {
                     title="Sub-Admin Management"
                     description="Create and manage Sub-Admin accounts"
                     icon="🛡️"
+                    href="/dashboard/sub-admins"
                   />
                 </Link>
-                <DashboardCard
-                  title="Staff Management"
-                  description="Manage staff enrollment, profiles and documents"
-                  icon="👥"
-                />
-                <DashboardCard
-                  title="Office Locations"
-                  description="Configure office locations and geofence radius"
-                  icon="📍"
-                />
-                <DashboardCard
-                  title="Reports & Registers"
-                  description="Download movement registers, TA registers and reports"
-                  icon="📊"
-                />
+                <Link href="/dashboard/staff">
+                  <DashboardCard
+                    title="Staff Management"
+                    description="Manage staff enrollment, profiles and documents"
+                    icon="👥"
+                    href="/dashboard/staff"
+                  />
+                </Link>
+                <Link href="/dashboard/locations">
+                  <DashboardCard
+                    title="Office Locations"
+                    description="Configure office locations and geofence radius"
+                    icon="📍"
+                    href="/dashboard/locations"
+                  />
+                </Link>
+                <Link href="/dashboard/reports">
+                  <DashboardCard
+                    title="Reports & Registers"
+                    description="Download movement registers, TA registers and reports"
+                    icon="📊"
+                    href="/dashboard/reports"
+                  />
+                </Link>
               </div>
             </div>
           )}
@@ -133,21 +161,30 @@ export default function DashboardPage() {
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Administration</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <DashboardCard
-                  title="Staff Management"
-                  description="Manage staff enrollment, profiles and documents"
-                  icon="👥"
-                />
-                <DashboardCard
-                  title="Office Locations"
-                  description="Configure office locations and geofence radius"
-                  icon="📍"
-                />
-                <DashboardCard
-                  title="Reports & Registers"
-                  description="Download movement registers, TA registers and reports"
-                  icon="📊"
-                />
+                <Link href="/dashboard/staff">
+                  <DashboardCard
+                    title="Staff Management"
+                    description="Manage staff enrollment, profiles and documents"
+                    icon="👥"
+                    href="/dashboard/staff"
+                  />
+                </Link>
+                <Link href="/dashboard/locations">
+                  <DashboardCard
+                    title="Office Locations"
+                    description="Configure office locations and geofence radius"
+                    icon="📍"
+                    href="/dashboard/locations"
+                  />
+                </Link>
+                <Link href="/dashboard/reports">
+                  <DashboardCard
+                    title="Reports & Registers"
+                    description="Download movement registers, TA registers and reports"
+                    icon="📊"
+                    href="/dashboard/reports"
+                  />
+                </Link>
               </div>
             </div>
           )}
@@ -183,10 +220,12 @@ function DashboardCard({
   title,
   description,
   icon,
+  href,
 }: {
   title: string;
   description: string;
   icon: string;
+  href?: string;
 }) {
   return (
     <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow cursor-pointer">

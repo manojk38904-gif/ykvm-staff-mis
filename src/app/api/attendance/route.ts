@@ -5,6 +5,34 @@ import prisma from '@/lib/prisma'
 import { haversineDistance } from '@/lib/geo'
 import { LocalStorageAdapter } from '@/lib/storage'
 
+// GET /api/attendance
+export async function GET(req: NextRequest) {
+  const session = await getServerSession({ req, ...authOptions })
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const userId = (session.user as any).id
+  const role = (session.user as any).role
+
+  if (role === 'STAFF') {
+    const staff = await prisma.staffProfile.findFirst({ where: { userId } })
+    if (!staff) return NextResponse.json({ attendances: [] })
+    const attendances = await prisma.attendance.findMany({
+      where: { staffId: staff.id },
+      orderBy: { datetime: 'desc' },
+      take: 30,
+    })
+    return NextResponse.json({ attendances })
+  } else {
+    const attendances = await prisma.attendance.findMany({
+      orderBy: { datetime: 'desc' },
+      take: 50,
+      include: { staff: { include: { user: { select: { name: true, email: true } } } } },
+    })
+    return NextResponse.json({ attendances })
+  }
+}
+
 // POST /api/attendance
 export async function POST(req: NextRequest) {
   const session = await getServerSession({ req, ...authOptions })
