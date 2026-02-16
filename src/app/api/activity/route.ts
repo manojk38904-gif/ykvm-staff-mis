@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { LocalStorageAdapter } from '@/lib/storage'
+import { LocalStorageAdapter } from '@/lib/storage'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // GET /api/activity?fieldTripId=... - list activities for trip
 export async function GET(req: NextRequest) {
